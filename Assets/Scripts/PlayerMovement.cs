@@ -1,39 +1,79 @@
-using System.Collections;
+ using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 8.0f;
-
-    private void Update()
+    private Rigidbody2D rb;
+    private float x;
+    private float y;
+    private Animator animator;
+    private SpriteRenderer sprite;
+    [SerializeField]
+    private float speed = 15f;
+    [SerializeField]
+    private float jump = 20f;
+    // Start is called before the first frame update
+    void Start()
     {
-        if (Input.GetKey(KeyCode.UpArrow) && transform.position.z < 20)
+        rb = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
+        sprite = GetComponent<SpriteRenderer>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+
+        x = Input.GetAxisRaw("Horizontal");
+        y = Input.GetAxisRaw("Vertical");
+        Debug.Log(y);
+        if(Input.GetButtonDown("Jump"))
         {
-            transform.position += transform.forward * speed * Time.deltaTime;
+            rb.velocity = new Vector2(rb.velocity.x, jump);
         }
-        if (Input.GetKey(KeyCode.DownArrow) && transform.position.z > 12)
+        rb.velocity= new Vector2(x * speed,rb.velocity.y);
+
+        AnimationState();
+
+        checkIfFall();
+
+    }
+
+    private void AnimationState()
+    {
+        if (x > 0)
         {
-            transform.position -= transform.forward * speed * Time.deltaTime;
+            animator.SetBool("Running", true);
+            sprite.flipX = false;
         }
-        if (Input.GetKey(KeyCode.RightArrow) && transform.position.x < 2)
+        else if (x < 0)
         {
-            transform.position += transform.right * speed * Time.deltaTime;
+            animator.SetBool("Running", true);
+            sprite.flipX = true;
         }
-        if (Input.GetKey(KeyCode.LeftArrow) && transform.position.x > -10)
+        else
         {
-            transform.position -= transform.right * speed * Time.deltaTime;
+            animator.SetBool("Running", false);
+            
+        }
+
+        if (y != 0)
+        {
+            animator.SetBool("jump", true);
+        }
+        else
+        {
+            animator.SetBool("jump", false);
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void checkIfFall()
     {
-
-        Destroy(other.gameObject);
-        Debug.Log("test");
-        
-
+        if (transform.position.y < -2)
+        {
+            UnityEditor.EditorApplication.isPlaying = false;
+        }
     }
 }
-
